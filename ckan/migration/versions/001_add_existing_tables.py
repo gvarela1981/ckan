@@ -12,7 +12,7 @@ def upgrade(migrate_engine):
     # config if you've altered the default schema from 'public' in your
     # postgresql.conf. Because this is such a rarely needed option, it is
     # otherwise undocumented.
-    meta = MetaData(schema=schema)
+    meta = MetaData(schema='public')
 
     state = Table('state', meta,
       Column('id', Integer() ,  primary_key=True, nullable=False),
