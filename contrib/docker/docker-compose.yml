@@ -15,10 +15,6 @@ services:
       context: ../../
       args:
           - CKAN_SITE_URL=${CKAN_SITE_URL}
-    links:
-      - db
-      - solr
-      - redis
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
     environment:
@@ -38,6 +34,9 @@ services:
       - ckan_config:/etc/ckan
       - ckan_home:/usr/lib/ckan
       - ckan_storage:/var/lib/ckan
+    
+    networks:
+      - postgis
 
   datapusher:
     container_name: datapusher
@@ -45,27 +44,36 @@ services:
     ports:
       - "8800:8800"
 
-  db:
-    container_name: db
-    build:
-      context: ../../
-      dockerfile: contrib/docker/postgresql/Dockerfile
-      args:
-        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    environment:
-      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+  # db2:
+  #   container_name: db2
+  #   build:
+  #     context: ../../
+  #     dockerfile: contrib/docker/postgresql/Dockerfile
+  #     args:
+  #       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+  #       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   environment:
+  #     - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
 
   solr:
     container_name: solr
     build:
       context: ../../
       dockerfile: contrib/docker/solr/Dockerfile
+    networks:
+      - postgis
 
 
   redis:
     container_name: redis
     image: redis:latest
+    networks:
+      - postgis
+
+networks:
+  postgis:
+    external: 
+      name: postgis_postgis
